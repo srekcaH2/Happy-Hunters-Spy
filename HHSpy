@@ -1,0 +1,97 @@
+local p = game:GetService("Players").LocalPlayer
+local pg = p:WaitForChild("PlayerGui")
+local UIS = game:GetService("UserInputService")
+
+local s = Instance.new("ScreenGui")
+s.Name = "HHSpy"
+s.ResetOnSpawn = false
+s.Parent = pg
+
+local f = Instance.new("Frame", s)
+f.Size = UDim2.new(0, 360, 0, 280)
+f.Position = UDim2.new(0, 20, 0, 60)
+f.BackgroundTransparency = 0.05
+f.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+f.Active = true
+f.Draggable = true
+Instance.new("UICorner", f).CornerRadius = UDim.new(0, 8)
+
+local fg = Instance.new("UIGradient", f)
+fg.Color = ColorSequence.new{
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 90, 90)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
+}
+fg.Rotation = 270
+
+local title = Instance.new("TextLabel", f)
+title.Size = UDim2.new(1, -65, 0, 28)
+title.Position = UDim2.new(0, 8, 0, 8)
+title.BackgroundTransparency = 1
+title.Text = "HHSpy v1.1"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Font = Enum.Font.Sarpanch
+title.TextScaled = true
+
+local tstroke = Instance.new("UIStroke", title)
+tstroke.Color = Color3.fromRGB(255, 255, 255)
+tstroke.Thickness = 0.5
+tstroke.Transparency = 0.25
+
+local sf = Instance.new("ScrollingFrame", f)
+sf.Size = UDim2.new(1, -10, 1, -65)
+sf.Position = UDim2.new(0, 5, 0, 40)
+sf.BackgroundTransparency = 1
+sf.BorderSizePixel = 0
+sf.ScrollBarThickness = 3
+sf.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+Instance.new("UICorner", sf).CornerRadius = UDim.new(0, 6)
+
+local uiList = Instance.new("UIListLayout", sf)
+uiList.SortOrder = Enum.SortOrder.LayoutOrder
+
+local ctrlg = Instance.new("TextLabel", f)
+ctrlg.Size = UDim2.new(1, -10, 0, 18)
+ctrlg.Position = UDim2.new(0, 5, 1, -22)
+ctrlg.BackgroundTransparency = 1
+ctrlg.Text = "ctrl+G to hide/unhide"
+ctrlg.Font = Enum.Font.Sarpanch
+ctrlg.TextSize = 14
+ctrlg.TextTransparency = 0.75
+ctrlg.TextColor3 = Color3.fromRGB(255, 255, 255)
+ctrlg.TextXAlignment = Enum.TextXAlignment.Left
+
+local function addLine(remote, method)
+	local l = Instance.new("TextLabel")
+	l.Size = UDim2.new(1, -6, 0, 22)
+	l.BackgroundTransparency = 1
+	l.Font = Enum.Font.Code
+	l.TextSize = 14
+	l.TextColor3 = Color3.fromRGB(0, 255, 0)
+	l.TextXAlignment = Enum.TextXAlignment.Left
+	l.Text = string.format("[%s] %s  (%s)", method, remote.Name, remote:GetFullName())
+	l.Parent = sf
+end
+local mt = getrawmetatable(game)
+setreadonly(mt, false)
+local oldNamecall = mt.__namecall
+
+mt.__namecall = function(self, ...)
+	local method = getnamecallmethod()
+	if self:IsA("RemoteEvent") and (method == "FireServer" or method == "FireClient") then
+		addLine(self, method)
+	end
+	return oldNamecall(self, ...)
+end
+
+UIS.InputBegan:Connect(function(i, processed)
+	if processed then return end
+
+	local ctrl = UIS:IsKeyDown(Enum.KeyCode.LeftControl) or UIS:IsKeyDown(Enum.KeyCode.RightControl)
+	if not ctrl then return end
+
+	if i.KeyCode == Enum.KeyCode.G then
+		f.Visible = not f.Visible
+	end
+end)
