@@ -8,7 +8,7 @@ s.ResetOnSpawn = false
 s.Parent = pg
 
 local f = Instance.new("Frame", s)
-f.Size = UDim2.new(0, 360, 0, 280)
+f.Size = UDim2.new(0, 560, 0, 300)
 f.Position = UDim2.new(0, 20, 0, 60)
 f.BackgroundTransparency = 0.05
 f.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
@@ -23,11 +23,17 @@ fg.Color = ColorSequence.new{
 }
 fg.Rotation = 270
 
+local imag = Instance.new("ImageLabel", f)
+imag.Size = UDim2.new(1, -480, 0, 80)
+imag.Position = UDim2.new(0, 500, 0, -35)
+imag.BackgroundTransparency = 1
+imag.Image = "rbxassetid://121523454509020"
+
 local title = Instance.new("TextLabel", f)
 title.Size = UDim2.new(1, -65, 0, 28)
 title.Position = UDim2.new(0, 8, 0, 8)
 title.BackgroundTransparency = 1
-title.Text = "HHSpy v1.1"
+title.Text = "HHSpy v1.2"
 title.TextColor3 = Color3.new(1, 1, 1)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Font = Enum.Font.Sarpanch
@@ -38,31 +44,112 @@ tstroke.Color = Color3.fromRGB(255, 255, 255)
 tstroke.Thickness = 0.5
 tstroke.Transparency = 0.25
 
-local sf = Instance.new("ScrollingFrame", f)
-sf.Size = UDim2.new(1, -10, 1, -65)
-sf.Position = UDim2.new(0, 5, 0, 40)
-sf.BackgroundTransparency = 1
-sf.BorderSizePixel = 0
-sf.ScrollBarThickness = 3
-sf.AutomaticCanvasSize = Enum.AutomaticSize.Y
+local tabFrame = Instance.new("Frame", f)
+tabFrame.Size = UDim2.new(1, -10, 0, 28)
+tabFrame.Position = UDim2.new(0, 5, 0, 40)
+tabFrame.BackgroundTransparency = 1
 
-Instance.new("UICorner", sf).CornerRadius = UDim.new(0, 6)
+local function makeTabButton(name, posX)
+	local btn = Instance.new("TextButton", tabFrame)
+	btn.Size = UDim2.new(0, 80, 1, 0)
+	btn.Position = UDim2.new(0, posX, 0, 0)
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.TextSize = 20
+	btn.Text = name
+	btn.Font = Enum.Font.Sarpanch
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 4)
+	return btn
+end
 
-local uiList = Instance.new("UIListLayout", sf)
-uiList.SortOrder = Enum.SortOrder.LayoutOrder
+local serverBtn = makeTabButton("Server", 3)
+local localBtn = makeTabButton("Local", 91)
+local infosBtn = makeTabButton("Infos", 467)
+serverBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 
-local ctrlg = Instance.new("TextLabel", f)
-ctrlg.Size = UDim2.new(1, -10, 0, 18)
-ctrlg.Position = UDim2.new(0, 5, 1, -22)
-ctrlg.BackgroundTransparency = 1
-ctrlg.Text = "ctrl+G to hide/unhide"
-ctrlg.Font = Enum.Font.Sarpanch
-ctrlg.TextSize = 14
-ctrlg.TextTransparency = 0.75
-ctrlg.TextColor3 = Color3.fromRGB(255, 255, 255)
-ctrlg.TextXAlignment = Enum.TextXAlignment.Left
+local sfServer = Instance.new("ScrollingFrame", f)
+sfServer.Size = UDim2.new(1, -10, 1, -82)
+sfServer.Position = UDim2.new(0, 5, 0, 75)
+sfServer.BackgroundTransparency = 1
+sfServer.BorderSizePixel = 0
+sfServer.ScrollBarThickness = 3
+sfServer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Instance.new("UICorner", sfServer).CornerRadius = UDim.new(0, 6)
 
-local function addLine(remote, method)
+local layout1 = Instance.new("UIListLayout", sfServer)
+layout1.SortOrder = Enum.SortOrder.LayoutOrder
+
+local function cloneWithCleanLayout(src, parent)
+	local c = src:Clone()
+	c.Parent = parent
+	for _, ch in ipairs(c:GetChildren()) do
+		if ch:IsA("UIListLayout") then
+			ch:Destroy()
+		end
+	end
+	local newLayout = Instance.new("UIListLayout", c)
+	newLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	return c
+end
+
+local sfLocal = cloneWithCleanLayout(sfServer, f)
+sfLocal.Visible = false
+
+local paddingLocal = Instance.new("UIPadding", sfLocal)
+paddingLocal.PaddingLeft = UDim.new(0, 3)
+
+local paddingServer = Instance.new("UIPadding", sfServer)
+paddingServer.PaddingLeft = UDim.new(0, 3)
+
+local sfInfos = cloneWithCleanLayout(sfServer, f)
+sfInfos.Visible = false
+
+local padding = Instance.new("UIPadding", sfInfos)
+padding.PaddingLeft = UDim.new(0, 3)
+padding.PaddingTop = UDim.new(0, 3)
+
+local infoText = Instance.new("TextLabel", sfInfos)
+infoText.Size = UDim2.new(1, -10, 0, 24)
+infoText.Position = UDim2.new(0, 0, 0, 0)
+infoText.BackgroundTransparency = 1
+infoText.Font = Enum.Font.Code
+infoText.TextSize = 14
+infoText.TextTransparency = 0.75
+infoText.TextColor3 = Color3.fromRGB(255, 255, 255)
+infoText.TextXAlignment = Enum.TextXAlignment.Left
+infoText.Text = "ctrl+G to hide/unhide"
+
+local info2 = infoText:Clone()
+info2.Text = "made by srekcaH2"
+info2.Position = UDim2.new(0, 0, 0, 24)
+info2.Parent = sfInfos
+
+local function switchTab(tab)
+	sfServer.Visible = false
+	sfLocal.Visible = false
+	sfInfos.Visible = false
+	serverBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	localBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	infosBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+
+	if tab == "server" then
+		sfServer.Visible = true
+		serverBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	elseif tab == "local" then
+		sfLocal.Visible = true
+		localBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	elseif tab == "infos" then
+		sfInfos.Visible = true
+		infosBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	end
+end
+
+serverBtn.MouseButton1Click:Connect(function() switchTab("server") end)
+localBtn.MouseButton1Click:Connect(function() switchTab("local") end)
+infosBtn.MouseButton1Click:Connect(function() switchTab("infos") end)
+
+local function addLine(remote, method, args)
+	local text = string.format("[%s] %s (%s)", method, remote.Name, remote:GetFullName())
 	local l = Instance.new("TextLabel")
 	l.Size = UDim2.new(1, -6, 0, 22)
 	l.BackgroundTransparency = 1
@@ -70,28 +157,41 @@ local function addLine(remote, method)
 	l.TextSize = 14
 	l.TextColor3 = Color3.fromRGB(0, 255, 0)
 	l.TextXAlignment = Enum.TextXAlignment.Left
-	l.Text = string.format("[%s] %s  (%s)", method, remote.Name, remote:GetFullName())
-	l.Parent = sf
-end
-local mt = getrawmetatable(game)
-setreadonly(mt, false)
-local oldNamecall = mt.__namecall
+	l.Text = text
 
-mt.__namecall = function(self, ...)
-	local method = getnamecallmethod()
-	if self:IsA("RemoteEvent") and (method == "FireServer" or method == "FireClient") then
-		addLine(self, method)
+	if method == "FireServer" then
+		l.Parent = sfLocal
+	else
+		l.Parent = sfServer
 	end
-	return oldNamecall(self, ...)
 end
+
+local oldFireServer
+oldFireServer = hookfunction(Instance.new("RemoteEvent").FireServer, function(self, ...)
+	addLine(self, "FireServer", {...})
+	return oldFireServer(self, ...)
+end)
+
+for _, remote in ipairs(game:GetDescendants()) do
+	if remote:IsA("RemoteEvent") then
+		remote.OnClientEvent:Connect(function(...)
+			addLine(remote, "OnClientEvent", {...})
+		end)
+	end
+end
+
+game.DescendantAdded:Connect(function(obj)
+	if obj:IsA("RemoteEvent") then
+		obj.OnClientEvent:Connect(function(...)
+			addLine(obj, "OnClientEvent", {...})
+		end)
+	end
+end)
 
 UIS.InputBegan:Connect(function(i, processed)
 	if processed then return end
-
 	local ctrl = UIS:IsKeyDown(Enum.KeyCode.LeftControl) or UIS:IsKeyDown(Enum.KeyCode.RightControl)
-	if not ctrl then return end
-
-	if i.KeyCode == Enum.KeyCode.G then
+	if ctrl and i.KeyCode == Enum.KeyCode.G then
 		f.Visible = not f.Visible
 	end
 end)
